@@ -15,8 +15,8 @@ const fetchChartData = async () => {
       body: JSON.stringify({
         method: 'getOrdersChartData',
         data: {
-          start: start,
-          end: end
+          start: '2024-07-01 00:00:00',
+          end: '2024-07-01 23:59:59'
         }
       })
     });
@@ -193,7 +193,7 @@ const chart01 = async () => {
         },
       },
       min: 0,
-      max: 100,
+      max: 150,
     },
   };
 

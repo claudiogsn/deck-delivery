@@ -169,7 +169,7 @@ document.addEventListener("DOMContentLoaded", function() {
   storeFilter.addEventListener('change', fetchData);
 
   fetchData();
-  setInterval(fetchData, 60000); // Atualiza a cada minuto
+  setInterval(fetchData, 15000); // Atualiza a cada minuto
 });
 
 
