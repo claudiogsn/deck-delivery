@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function calculateAverageWaitingTime(data) {
-    const waitingTimes = data.filter(order => order.hora_saida !== "0000-00-00 00:00:00").map(order => (new Date(order.hora_saida) - new Date(order.tempo_preparo)) / 60000);
+    const waitingTimes = data.filter(order => order.hora_saida !== "0000-00-00 00:00:00" && order.tempo_preparo !== "0000-00-00 00:00:00"  ).map(order => (new Date(order.hora_saida) - new Date(order.tempo_preparo)) / 60000);
     const totalWaitingTime = waitingTimes.reduce((a, b) => a + b, 0);
     return Math.round(totalWaitingTime / waitingTimes.length);
   }
@@ -109,15 +109,16 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (timeOpen >= 30) {
         statusClass = 'bg-danger text-danger';
       }
+      const formattedHoraAbertura = formatDateTime(order.hora_abertura);
       const orderElem = document.createElement('tr');
       orderElem.innerHTML = `
-        <td class="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 class="font-medium text-black dark:text-white">${order.identificador_conta}</h5>
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10 px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 class="font-medium">${order.identificador_conta}</h5>
           <p class="text-sm">${order.intg_tipo} - ${order.num_controle}</p>
-          <p class="text-sm">${order.hora_abertura}</p>
+          <p class="text-sm">Abertura: ${formattedHoraAbertura}</p>
         </td>
-        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p class="inline-flex rounded-full ${statusClass} bg-opacity-10 px-3 py-1 text-sm font-medium">
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10 px-4 py-5 dark:border-strokedark">
+          <p class="inline-flex px-3 py-1 text-sm font-medium">
             ${timeOpen} min
           </p>
         </td>
@@ -133,15 +134,16 @@ document.addEventListener("DOMContentLoaded", function () {
       } else if (timeOpen >= 30) {
         statusClass = 'bg-danger text-danger';
       }
+      const formattedHoraAbertura = formatDateTime(order.hora_abertura);
       const orderElem = document.createElement('tr');
       orderElem.innerHTML = `
-        <td class="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 class="font-medium text-black dark:text-white">${order.identificador_conta}</h5>
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10  px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 class="font-medium">${order.identificador_conta}</h5>
           <p class="text-sm">${order.intg_tipo} - ${order.num_controle}</p>
-          <p class="text-sm">${order.hora_abertura}</p>
+          <p class="text-sm">Abertura: ${formattedHoraAbertura}</p>
         </td>
-        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p class="inline-flex rounded-full ${statusClass} bg-opacity-10 px-3 py-1 text-sm font-medium">
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10  px-4 py-5 dark:border-strokedark">
+          <p class="inline-flex px-3 py-1 text-sm font-medium">
             ${timeOpen} min
           </p>
         </td>
@@ -149,22 +151,25 @@ document.addEventListener("DOMContentLoaded", function () {
       readyOrdersElem.appendChild(orderElem);
     });
 
-    dispatchedOrders.sort((a, b) => new Date(a.hora_saida) - new Date(b.hora_saida)).forEach(order => {
-      const timeOpen = calculateTimeOpen(order.hora_abertura);
-      const isLate = (new Date(order.hora_saida) - new Date(order.hora_abertura)) / 60000 > 30;
+    dispatchedOrders.sort((a, b) => new Date(b.hora_saida) - new Date(a.hora_saida)).forEach(order => {
+      const timeOpen = Math.round((new Date(order.hora_saida) - new Date(order.hora_abertura)) / 60000);
+      const isLate = timeOpen > 30;
       let statusClass = 'bg-success text-success';
       if (isLate) {
         statusClass = 'bg-danger text-danger';
       }
+      const formattedHoraSaida = formatDateTime(order.hora_saida);
+      const formattedHoraAbertura = formatDateTime(order.hora_abertura);
       const orderElem = document.createElement('tr');
       orderElem.innerHTML = `
-        <td class="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
-          <h5 class="font-medium text-black dark:text-white">${order.identificador_conta}</h5>
-          <p class="text-sm">${order.intg_tipo} - ${order.num_controle}</p>
-          <p class="text-sm">${order.hora_saida}</p>
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10 px-4 py-5 pl-9 dark:border-strokedark xl:pl-11">
+          <h5 class="font-medium ">${order.identificador_conta}</h5>
+          <p class="text-sm ">${order.intg_tipo} - ${order.num_controle}</p>
+          <p class="text-sm ">Abertura: ${formattedHoraAbertura}</p>
+          <p class="text-sm ">Saida: ${formattedHoraSaida}</p>
         </td>
-        <td class="border-b border-[#eee] px-4 py-5 dark:border-strokedark">
-          <p class="inline-flex rounded-full ${statusClass} bg-opacity-10 px-3 py-1 text-sm font-medium">
+        <td class="border-b border-[#eee] ${statusClass} bg-opacity-10 px-4 py-5 dark:border-strokedark">
+          <p class="inline-flex rounded-full px-3 py-1 text-sm font-medium">
             ${timeOpen} min
           </p>
         </td>
@@ -172,10 +177,24 @@ document.addEventListener("DOMContentLoaded", function () {
       dispatchedOrdersElem.appendChild(orderElem);
     });
   }
+    
+    
+
+  function formatDateTime(dateString) {
+    return new Date(dateString).toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
+  
 
   function calculateTimeOpen(horaAbertura) {
     return Math.round((new Date() - new Date(horaAbertura)) / 60000);
   }
+
 
   searchOrderElem.addEventListener('input', fetchData);
   fetchDataBtn.addEventListener('click', fetchData);
