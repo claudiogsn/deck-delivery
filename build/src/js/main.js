@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const storeFilter = document.getElementById('store-filter');
-  const integrationFilter = document.getElementById('integration-filter');
+  const storeFilterElem = document.getElementById('store-filter');
+  const integrationFilterElem = document.getElementById('integration-filter');
   const startDateElem = document.getElementById('start-date');
   const endDateElem = document.getElementById('end-date');
   const fetchDataBtn = document.getElementById('fetch-data-btn');
@@ -46,13 +46,13 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateDashboard(data) {
-    const storeCnpj = storeFilter.value;
-    if (storeCnpj !== "all") {
-      data = data.filter(order => order.cnpj === storeCnpj);
+    const storeCnpjs = Array.from(storeFilterElem.selectedOptions).map(option => option.value);
+    if (!storeCnpjs.includes("all")) {
+      data = data.filter(order => storeCnpjs.includes(order.cnpj));
     }
-    const integrationType = integrationFilter.value;
-    if (integrationType !== "all") {
-      data = data.filter(order => order.intg_tipo === integrationType);
+    const integrationTypes = Array.from(integrationFilterElem.selectedOptions).map(option => option.value);
+    if (!integrationTypes.includes("all")) {
+      data = data.filter(order => integrationTypes.includes(order.intg_tipo));
     }
     const searchQuery = searchOrderElem.value.toLowerCase();
     if (searchQuery) {
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function calculateAverageWaitingTime(data) {
-    const waitingTimes = data.filter(order => order.hora_saida !== "0000-00-00 00:00:00" && order.tempo_preparo !== "0000-00-00 00:00:00"  ).map(order => (new Date(order.hora_saida) - new Date(order.tempo_preparo)) / 60000);
+    const waitingTimes = data.filter(order => order.hora_saida !== "0000-00-00 00:00:00" && order.tempo_preparo !== "0000-00-00 00:00:00").map(order => (new Date(order.hora_saida) - new Date(order.tempo_preparo)) / 60000);
     const totalWaitingTime = waitingTimes.reduce((a, b) => a + b, 0);
     return Math.round(totalWaitingTime / waitingTimes.length);
   }
@@ -177,8 +177,6 @@ document.addEventListener("DOMContentLoaded", function () {
       dispatchedOrdersElem.appendChild(orderElem);
     });
   }
-    
-    
 
   function formatDateTime(dateString) {
     return new Date(dateString).toLocaleString('pt-BR', {
@@ -189,17 +187,15 @@ document.addEventListener("DOMContentLoaded", function () {
       minute: '2-digit',
     });
   }
-  
 
   function calculateTimeOpen(horaAbertura) {
     return Math.round((new Date() - new Date(horaAbertura)) / 60000);
   }
 
-
   searchOrderElem.addEventListener('input', fetchData);
   fetchDataBtn.addEventListener('click', fetchData);
-  storeFilter.addEventListener('change', fetchData);
-  integrationFilter.addEventListener('change', fetchData);
+  storeFilterElem.addEventListener('change', fetchData);
+  integrationFilterElem.addEventListener('change', fetchData);
   fetchData();
   setInterval(fetchData, 15000);
 });
